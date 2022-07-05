@@ -1,0 +1,23 @@
+contract RAD {
+    PubKey aliceKey;
+    PubKey bobKey;
+    Sha256 bobHash;
+    constructor (PubKey aliceKey, PubKey bobKey, Sha256 bobHash) {
+        this.aliceKey = aliceKey;
+        this.bobKey = bobKey;
+        this.bobHash = bobHash;
+    }
+
+    // Called by Alice once Bob took the BSVs
+    public function takeTheMoney(SigHashPreimage tx, bytes bobPreimage, Sig sig) {
+        require(Tx.checkPreimage(tx));
+        require(sha256(bobPreimage) == this.bobHash);
+        require(checkSig(sig, this.aliceKey));
+    }
+
+    public function cancelEverything(SigHashPreimage tx, Sig sig) {
+        require(Tx.checkPreimage(tx));
+        //Todo timelock
+        require(checkSig(sig, this.bobKey));
+    }
+}

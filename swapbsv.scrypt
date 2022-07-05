@@ -1,0 +1,39 @@
+/*
+Alice locks 1BSV, wants 10RAD for it
+Bob accept the offer, locks 10RAD
+Alice sees that, accept bob offer. Now bob can reveal its hash to get the money
+Bob takes the 1BSV, reveal his hash B
+Alice takes the 10RAD with the preimage of hash B
+*/
+contract BSV {
+    @state PubKey bobKey;
+    @state Sha256 bobHash;
+
+    PubKey aliceKey;
+    constructor(PubKey aliceKey) {
+        this.aliceKey = aliceKey;
+    }
+
+    // Called by Alice herself when she sees Bob utxo on rad
+    public function addOffer(SigHashPreimage tx, Sig sig, Sha256 bobHash, PubKey bobKey) {
+        require(Tx.checkPreimage(tx));
+        require(checkSig(sig, this.aliceKey));
+        this.bobHash = bobHash;
+        this.bobKey = bobKey;
+        //Todo keep state
+        require(true);
+    }
+
+    // Called by Bob. Doing so he reveals its hash
+    public function revealHashGetMoney(SigHashPreimage tx, bytes bobPreimage, Sig sig) {
+        require(Tx.checkPreimage(tx));
+        require(sha256(bobPreimage) == this.bobHash);
+        require(checkSig(sig, this.bobKey));
+    }
+
+    public function cancelEverything(SigHashPreimage tx, Sig sig) {
+        require(Tx.checkPreimage(tx));
+        //Todo timelock
+        require(checkSig(sig, this.aliceKey));
+    }
+}
